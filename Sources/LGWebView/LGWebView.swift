@@ -8,9 +8,11 @@
 import UIKit
 import WebKit
 
+@objc
 public class LGWebView: WKWebView{
     let id: String
     
+    @objc
     required init(id: String = "sharedWebView") {
         let configuration = WKWebViewConfiguration()
         self.id = id
@@ -23,6 +25,7 @@ public class LGWebView: WKWebView{
         fatalError("init(coder:) has not been implemented")
     }
     
+    @objc
     public func persistInstance() {
         LGPoolService.shared.save(pool: self.configuration.processPool, for: id)
         self.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
@@ -30,6 +33,7 @@ public class LGWebView: WKWebView{
         }
     }
     
+    @objc
     public override func load(_ request: URLRequest) -> WKNavigation? {
         let cookies = LGCookieService.shared.getSavedLoginCookies(for: id)
         
@@ -49,6 +53,7 @@ public class LGWebView: WKWebView{
         }
     }
     
+    @objc
     public static func clearPersistence(for id: String = "sharedWebView") {
         LGPoolService.shared.clearPoolData(for: id)
         LGCookieService.shared.clearLoginCookies(for: id)
