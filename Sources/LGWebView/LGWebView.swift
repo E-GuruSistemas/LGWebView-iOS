@@ -5,15 +5,16 @@
 //  Created by Murilo Araujo on 02/10/20.
 //
 
+import Foundation
 import UIKit
 import WebKit
 
 @objc
 public class LGWebView: WKWebView{
     let id: String
-    
+    var injectedCookies: [HTTPCookie] = []
     @objc
-    required init(id: String = "sharedWebView") {
+    required init(with id: String = "sharedWebView") {
         let configuration = WKWebViewConfiguration()
         self.id = id
         configuration.processPool = LGPoolService.shared.getPool(for: id)
@@ -29,14 +30,24 @@ public class LGWebView: WKWebView{
     public func persistInstance() {
         LGPoolService.shared.save(pool: self.configuration.processPool, for: id)
         self.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
-            LGCookieService.shared.saveLoginCookies(cookies, for: self.id)
+            let cookiesForPersistence = cookies.filter { (httpCookie) -> Bool in
+                for injectedCookie in self.injectedCookies {
+                    if injectedCookie.name == httpCookie.name,
+                       injectedCookie.domain == httpCookie.domain {
+                        return false
+                    }
+                }
+                return true
+            }
+            LGCookieService.shared.saveLoginCookies(cookiesForPersistence, for: self.id)
         }
     }
     
     @objc
-    public override func load(_ request: URLRequest) -> WKNavigation? {
-        let cookies = LGCookieService.shared.getSavedLoginCookies(for: id)
-        
+    public func loadRequest(_ request: URLRequest, with injectedCookies: [HTTPCookie] = []) -> WKNavigation? {
+        var cookies = LGCookieService.shared.getSavedLoginCookies(for: id)
+        cookies += injectedCookies
+        self.injectedCookies = injectedCookies
         if (cookies.count > 0){
             let cookieStore = self.configuration.websiteDataStore.httpCookieStore
             
