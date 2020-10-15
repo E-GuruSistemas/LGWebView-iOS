@@ -10,12 +10,15 @@ import UIKit
 import WebKit
 
 @objc
-public class LGWebView: WKWebView{
+open class LGWebView: WKWebView{
     @objc let id: String
     @objc var injectedCookies: [HTTPCookie] = []
     
+    
+    /// Returns a WKWebview configured with a persistence key
+    /// - Parameter id: The key used to track the persistence
     @objc
-    required init(id: String = "sharedWebView") {
+    required public init(id: String = "sharedWebView") {
         let configuration = WKWebViewConfiguration()
         self.id = id
         configuration.processPool = LGPoolService.shared.getPool(for: id)
@@ -23,10 +26,11 @@ public class LGWebView: WKWebView{
         super.init(frame: .zero, configuration: configuration)
     }
     
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// Saves the state of the WebView
     @objc
     public func persistInstance() {
         LGPoolService.shared.save(pool: self.configuration.processPool, for: id)
@@ -44,7 +48,13 @@ public class LGWebView: WKWebView{
         }
     }
     
+    /// Loads request with optional cookie injection
+    /// - Parameters:
+    ///   - request: The url request for loading
+    ///   - injectedCookies: Optional cookies for injection
+    /// - Returns: WKNavigation
     @objc
+    
     public func loadRequest(_ request: URLRequest, with injectedCookies: [HTTPCookie] = []) -> WKNavigation? {
         var cookies = LGCookieService.shared.getSavedLoginCookies(for: id)
         cookies += injectedCookies
@@ -65,7 +75,10 @@ public class LGWebView: WKWebView{
         }
     }
     
+    /// Clears the persistence data
+    /// - Parameter id: Optional identifier of the webview instance
     @objc
+    
     public static func clearPersistence(for id: String = "sharedWebView") {
         LGPoolService.shared.clearPoolData(for: id)
         LGCookieService.shared.clearLoginCookies(for: id)
