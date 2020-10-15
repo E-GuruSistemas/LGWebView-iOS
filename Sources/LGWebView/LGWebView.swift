@@ -11,10 +11,11 @@ import WebKit
 
 @objc
 public class LGWebView: WKWebView{
-    let id: String
-    var injectedCookies: [HTTPCookie] = []
+    @objc let id: String
+    @objc var injectedCookies: [HTTPCookie] = []
+    
     @objc
-    required init(with id: String = "sharedWebView") {
+    required init(id: String = "sharedWebView") {
         let configuration = WKWebViewConfiguration()
         self.id = id
         configuration.processPool = LGPoolService.shared.getPool(for: id)
