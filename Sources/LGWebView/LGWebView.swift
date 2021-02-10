@@ -26,8 +26,8 @@ open class LGWebView: WKWebView{
         super.init(frame: .zero, configuration: configuration)
     }
     
-    required public init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    required public convenience init?(coder: NSCoder) {
+        self.init()
     }
     
     /// Saves the state of the WebView
